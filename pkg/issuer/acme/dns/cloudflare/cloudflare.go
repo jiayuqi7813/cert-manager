@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -122,7 +123,7 @@ func FindNearestZoneForFQDN(ctx context.Context, c DNSProviderType, fqdn string)
 			continue
 		}
 		lastErr = nil
-		result, err := c.makeRequest(ctx, "GET", "/zones?name="+nextName, nil)
+		result, err := c.makeRequest(ctx, "GET", "/zones?name="+url.QueryEscape(nextName), nil)
 		if err != nil {
 			lastErr = err
 			continue
@@ -218,7 +219,7 @@ func (c *DNSProvider) findTxtRecord(ctx context.Context, fqdn, content string) (
 	result, err := c.makeRequest(
 		ctx,
 		"GET",
-		fmt.Sprintf("/zones/%s/dns_records?per_page=100&type=TXT&name=%s", zoneID, util.UnFqdn(fqdn)),
+		fmt.Sprintf("/zones/%s/dns_records?per_page=100&type=TXT&name=%s", zoneID, url.QueryEscape(util.UnFqdn(fqdn))),
 		nil,
 	)
 	if err != nil {

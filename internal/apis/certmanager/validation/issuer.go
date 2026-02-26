@@ -331,10 +331,17 @@ func ValidateVaultIssuerAuth(auth *certmanager.VaultAuth, fldPath *field.Path) f
 		if auth.AppRole.SecretRef.Name == "" {
 			el = append(el, field.Required(fldPath.Child("appRole", "secretRef", "name"), ""))
 		}
+
+		if strings.Contains(auth.AppRole.Path, "..") {
+			el = append(el, field.Invalid(fldPath.Child("appRole", "path"), auth.AppRole.Path, "path must not contain '..'"))
+		}
 		unionCount++
 	}
 
 	if auth.ClientCertificate != nil {
+		if strings.Contains(auth.ClientCertificate.Path, "..") {
+			el = append(el, field.Invalid(fldPath.Child("clientCertificate", "mountPath"), auth.ClientCertificate.Path, "mountPath must not contain '..'"))
+		}
 		unionCount++
 	}
 
@@ -343,6 +350,10 @@ func ValidateVaultIssuerAuth(auth *certmanager.VaultAuth, fldPath *field.Path) f
 
 		if auth.Kubernetes.Role == "" {
 			el = append(el, field.Required(fldPath.Child("kubernetes", "role"), ""))
+		}
+
+		if strings.Contains(auth.Kubernetes.Path, "..") {
+			el = append(el, field.Invalid(fldPath.Child("kubernetes", "mountPath"), auth.Kubernetes.Path, "mountPath must not contain '..'"))
 		}
 
 		kubeCount := 0
